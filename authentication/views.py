@@ -12,9 +12,11 @@ from django.db import transaction
 
 class UserInformationView(APIView):
     permission_classes = [IsAuthenticated]
+    serializer_class = UserInformationSerializer
 
     def get(self, request):
-        response = self.serializer_class(request.user).data
+        profile = UserInformation.objects.select_related('user').get(user=request.user)
+        response = self.serializer_class(profile).data
         return Response(response)
     
 
