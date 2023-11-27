@@ -11,6 +11,11 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,8 +27,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = 'django-insecure-efd8cc0s1nvz-=2w=ljo5k%9bgh756y4@uq+!gt6evc!j%)&nf'
 
+PROD = os.getenv('DATABASE_URL') is not None
+
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = PROD is None
 
 ALLOWED_HOSTS = []
 
@@ -37,6 +44,14 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    # modules
+    'rest_framework',
+    'corsheaders',
+
+    # apps
+    'example_app',
+    'authentication',
 ]
 
 MIDDLEWARE = [
@@ -86,8 +101,12 @@ REST_FRAMEWORK = {
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'uibites'),
+        'USER': os.environ.get('DB_USER', 'postgres'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', 'postgres'),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),  # Empty string for localhost
+        'PORT': os.environ.get('DB_PORT', '5432'),  # Empty string for default
     }
 }
 
