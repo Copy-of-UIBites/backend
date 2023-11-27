@@ -1,4 +1,7 @@
-from django.http import HttpResponse
-
-def index(request):
-    return HttpResponse("<html><body><h1>Hello, World!</h1></body></html>", content_type="text/html")
+from rest_framework import viewsets
+from django.contrib.auth.models import User
+from example_app.serializers import UserSerializer
+# ViewSets define the view behavior.
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
