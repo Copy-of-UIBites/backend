@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 from .dataclasses.user_registration_dataclass import UserRegistrationEmailDataClass
 
-from .models import UserInformation
+from .models import UserInformation, PemilikKantin
 from .serializers import UserRegistrationSerializer, UserInformationSerializer
 from django.db import IntegrityError, transaction
 from django.db import transaction
@@ -47,10 +47,16 @@ class UserRegistrationEmailView(APIView):
                     role=data.role,
                     foto=data.foto,
                 )
+
+                if data.role == 'Pemilik Kantin':
+                    PemilikKantin.objects.create(
+                        user_information=user_information,
+                    )
             
             response = user_information
 
             return Response(UserInformationSerializer(response).data)
         except IntegrityError as e:
+            print (e)
             raise IntegrityErrorException('User has registered')
             

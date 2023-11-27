@@ -1,8 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import UserRole
-
-from .models import UserInformation
+from .models import UserRole, UserInformation, PemilikKantin
+from kantin.serializers import KantinSerializer
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
@@ -26,7 +25,7 @@ class UserInformationSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserInformation
         fields = '__all__'
-    
+
 class UserRegistrationSerializer(serializers.Serializer):
      # Base user model
     email = serializers.EmailField()
@@ -41,3 +40,11 @@ class UserRegistrationSerializer(serializers.Serializer):
         choices=UserRole.choices,
         default=UserRole.USER,
     )
+
+class PemilikKantinSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+    kantin = KantinSerializer()
+
+    class Meta:
+        model = PemilikKantin
+

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from kantin.models import Kantin
+
 # Create your models here.
 
 class UserRole(models.TextChoices):
@@ -24,6 +26,9 @@ class UserInformation(models.Model):
     def __str__(self):
         return f"{self.user.email} - {self.nama}"
     
-class CanteenOwner(models.Model):
+class PemilikKantin(models.Model):
     user_information = models.OneToOneField(UserInformation, on_delete=models.CASCADE, related_name='user_information')
-    
+    kantin = models.OneToOneField(Kantin, on_delete=models.CASCADE, related_name='kantin', blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.information.nama} - {self.kantin.nama}"
