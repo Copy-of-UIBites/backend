@@ -49,3 +49,7 @@ class UserRegistrationEmailView(APIView):
         response = user_information
 
         return Response(UserInformationSerializer(response).data)
+
+class UserLoginView(APIView):
+    def post(self, request):
+        pass
