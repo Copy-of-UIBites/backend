@@ -23,3 +23,7 @@ class UserInformation(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.nama}"
+    
+class CanteenOwner(models.Model):
+    user_information = models.OneToOneField(UserInformation, on_delete=models.CASCADE, related_name='user_information')
+    

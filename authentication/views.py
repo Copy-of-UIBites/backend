@@ -54,7 +54,3 @@ class UserRegistrationEmailView(APIView):
         except IntegrityError as e:
             raise IntegrityErrorException('User has registered')
             
-
-class UserLoginView(APIView):
-    def post(self, request):
-        pass

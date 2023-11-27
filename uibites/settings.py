@@ -51,7 +51,6 @@ INSTALLED_APPS = [
     'corsheaders',
 
     # apps
-    'example_app',
     'authentication',
     'kantin',
 ]
