@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     # apps
     'example_app',
     'authentication',
+    'kantin',
 ]
 
 MIDDLEWARE = [
