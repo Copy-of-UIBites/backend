@@ -42,8 +42,6 @@ class PemilikKantin(models.Model):
         :param user_information_id: ID of the UserInformation for which the Kantin is being registered.
         :param kantin_data: Dictionary containing data for the new Kantin.
         """
-        print(kantin_data)
-        print("=====")
         
         pemilik = cls.objects.get(
             user_information=user_information,

@@ -1,7 +1,7 @@
 from commons.exceptions import IntegrityErrorException
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
 
 from .dataclasses.user_registration_dataclass import UserRegistrationEmailDataClass
@@ -23,6 +23,7 @@ class UserInformationView(APIView):
 
 
 class UserRegistrationEmailView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         try:
             serializer = UserRegistrationSerializer(data=request.data)
