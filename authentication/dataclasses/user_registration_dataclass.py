@@ -1,7 +1,7 @@
-from pydantic import BaseModel
+from dataclasses import dataclass
 from typing import Optional
-
-class UserRegistrationEmailDataClass(BaseModel):
+@dataclass
+class UserRegistrationEmailDataClass():
     # Base user model
     email: str
     password: str
