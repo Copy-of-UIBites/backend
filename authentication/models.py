@@ -70,3 +70,13 @@ class PemilikKantin(models.Model):
             pemilik.save()
 
         return kantin
+    
+    def editProfilKantin(self, nama, deskripsi, list_foto):
+        if self.kantin:
+            self.kantin.nama = nama
+            self.kantin.deskripsi = deskripsi
+            self.kantin.list_foto = list_foto  
+            self.kantin.save()
+            return self.kantin
+        else:
+            raise ValueError("This PemilikKantin does not have a linked Kantin.")
