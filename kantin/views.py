@@ -3,8 +3,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from commons.exceptions import ExtendedAPIException, IntegrityErrorException, UnauthorizedException
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 from .models import Kantin
-from .serializers import KantinSerializer, RegisterKantinSerializer
-from commons.permissions import IsCanteenOwner
+from .serializers import KantinEditSerializer, KantinSerializer, RegisterKantinSerializer
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -46,3 +45,25 @@ class RegisterKantinView(APIView):
             raise IntegrityErrorException("Pemilik Kantin has registered Kantin previously")
         except Error as e:
             raise ExtendedAPIException(e)
+
+class EditKantinProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        try:
+            pemilik_kantin = PemilikKantin.objects.get(user_information__user=request.user)
+
+            serializer = KantinEditSerializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+
+            kantin = pemilik_kantin.editProfilKantin(
+                nama=serializer.validated_data['nama'],
+                deskripsi=serializer.validated_data['deskripsi'],
+                list_foto=serializer.validated_data['list_foto']
+            )
+
+            return Response({'message': 'Kantin profile updated successfully', 'kantin': kantin.nama})
+        except PemilikKantin.DoesNotExist:
+            return Response({'error': 'PemilikKantin not found'}, status=404)
+        except Exception as e:
+            return Response({'error': str(e)}, status=400)

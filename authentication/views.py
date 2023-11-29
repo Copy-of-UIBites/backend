@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from .dataclasses.user_registration_dataclass import UserRegistrationEmailDataClass
 
 from .models import UserInformation, PemilikKantin
-from .serializers import UserRegistrationSerializer, UserInformationSerializer, KantinEditSerializer
+from .serializers import UserRegistrationSerializer, UserInformationSerializer
 from django.db import IntegrityError, transaction
 from django.db import transaction
 
@@ -60,24 +60,3 @@ class UserRegistrationEmailView(APIView):
         except IntegrityError as e:
             raise IntegrityErrorException('User has registered')
             
-class EditKantinProfileView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def post(self, request):
-        try:
-            pemilik_kantin = PemilikKantin.objects.get(user_information__user=request.user)
-
-            serializer = KantinEditSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
-
-            kantin = pemilik_kantin.editProfilKantin(
-                nama=serializer.validated_data['nama'],
-                deskripsi=serializer.validated_data['deskripsi'],
-                list_foto=serializer.validated_data['list_foto']
-            )
-
-            return Response({'message': 'Kantin profile updated successfully', 'kantin': kantin.nama})
-        except PemilikKantin.DoesNotExist:
-            return Response({'error': 'PemilikKantin not found'}, status=404)
-        except Exception as e:
-            return Response({'error': str(e)}, status=400)

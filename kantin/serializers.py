@@ -22,3 +22,10 @@ class RegisterKantinSerializer(serializers.Serializer):
     list_foto = serializers.ListField(child=serializers.URLField(), required=False)
     status_verifikasi = serializers.ChoiceField(choices=StatusKantin.choices, default=StatusKantin.PENDING)
     
+class KantinEditSerializer(serializers.Serializer):
+    nama = serializers.CharField(max_length=1024)
+    deskripsi = serializers.CharField()
+    list_foto = serializers.ListField(
+        child=serializers.URLField(),
+        required=False  # Make it optional if you want
+    )
