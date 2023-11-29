@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Kantin
+from authentication.models import Kantin, Pengguna
 
 class KantinSerializer(serializers.ModelSerializer):
     class Meta:

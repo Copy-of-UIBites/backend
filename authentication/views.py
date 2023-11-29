@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 
 from .dataclasses.user_registration_dataclass import UserRegistrationEmailDataClass
 
-from .models import UserInformation, PemilikKantin
+from .models import Pengguna, UserInformation, PemilikKantin
 from .serializers import UserRegistrationSerializer, UserInformationSerializer
 from django.db import IntegrityError, transaction
 from django.db import transaction
@@ -50,6 +50,11 @@ class UserRegistrationEmailView(APIView):
 
                 if data.role == 'Pemilik Kantin':
                     PemilikKantin.objects.create(
+                        user_information=user_information,
+                    )
+                
+                if data.role == 'User':
+                    Pengguna.objects.create(
                         user_information=user_information,
                     )
             

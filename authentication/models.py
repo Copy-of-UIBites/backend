@@ -27,8 +27,15 @@ class UserInformation(models.Model):
         return f"{self.user.email} - {self.nama}"
     
 class PemilikKantin(models.Model):
-    user_information = models.OneToOneField(UserInformation, on_delete=models.CASCADE, related_name='user_information')
+    user_information = models.OneToOneField(UserInformation, on_delete=models.CASCADE, related_name='pemilik_kantin')
     kantin = models.OneToOneField(Kantin, on_delete=models.CASCADE, related_name='kantin', blank=True, null=True)
 
     def __str__(self):
         return f"{self.user.information.nama} - {self.kantin.nama}"
+    
+class Pengguna(models.Model):
+    user_information = models.OneToOneField(UserInformation, on_delete=models.CASCADE, related_name='pengguna')
+    kantin_favorit = models.ManyToManyField(Kantin, blank=True)
+
+    def __str__(self):
+        return f"{self.user_information.nama} - Favorite Kantins: {', '.join(str(kantin) for kantin in self.kantin_favorit.all())}"
