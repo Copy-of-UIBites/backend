@@ -57,6 +57,5 @@ class UserRegistrationEmailView(APIView):
 
             return Response(UserInformationSerializer(response).data)
         except IntegrityError as e:
-            print (e)
             raise IntegrityErrorException('User has registered')
             
