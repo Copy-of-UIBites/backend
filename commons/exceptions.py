@@ -31,6 +31,5 @@ class UnauthorizedException(ExtendedAPIException):
     status_code = status.HTTP_403_FORBIDDEN
 class InternalServerException(ExtendedAPIException):
     status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
-
 class IntegrityErrorException(ExtendedAPIException):
     status_code = status.HTTP_409_CONFLICT  
