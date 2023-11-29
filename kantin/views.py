@@ -1,12 +1,16 @@
 from django.shortcuts import render
 from requests import Response
 
-from authentication.models import UserInformation
+from authentication.models import Pengguna, UserInformation
 from commons.exceptions import BadRequestException, NotFoundException
 from .models import Kantin
 from rest_framework import viewsets
 from .models import Kantin
 from .serializers import KantinSerializer
+
+from django.contrib.auth.models import AnonymousUser
+
+from rest_framework.decorators import action
 
 
 class KantinViewSet(viewsets.ReadOnlyModelViewSet):
@@ -20,28 +24,30 @@ class KantinViewSet(viewsets.ReadOnlyModelViewSet):
             return Kantin.objects.all()
 
 class DaftarKantinFavoritViewSet(viewsets.ModelViewSet):
-    serializer_class = KantinSerializer
+    serializer_class = KantinSerializer  # Change to YourModelSerializer if needed
 
     def get_queryset(self):
-        pengguna = UserInformation.objects.select_related('user').get(user=self.request.user)
+        user = UserInformation.objects.select_related('user').get(user=self.request.user)
+        pengguna = Pengguna.objects.get(user_information=user)
         return pengguna.kantin_favorit.all()
+    
+    @action(detail=False, methods=['post'])
+    def add(self, request):
 
-    def perform_create(self, serializer):
-        pengguna = UserInformation.objects.select_related('user').get(user=self.request.user)
-        
-        kantin_id = self.request.data.get('kantin_id')
+        user = UserInformation.objects.select_related('user').get(user=request.user)
+        pengguna = Pengguna.objects.get(user_information=user)
 
-        # Ensure the Kantin exists
+
+        kantin_id = request.data.get('kantin_id')
+
         try:
             kantin = Kantin.objects.get(id=kantin_id)
         except Kantin.DoesNotExist:
-            return NotFoundException('Sorry, Kantin not found. 😢')    
+            return NotFoundException('Sorry, Kantin not found. 😢')
 
-        # Ensure the user doesn't already have this Kantin in favorites
         if kantin in pengguna.kantin_favorit.all():
             return BadRequestException('Kantin already in favorites.')
 
-        # Add the new favorite canteen entry
         pengguna.kantin_favorit.add(kantin)
-        
+
         return Response('Kantin added to your favorites! 🌟')
