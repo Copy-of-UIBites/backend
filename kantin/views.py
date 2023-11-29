@@ -1,6 +1,6 @@
 from authentication.models import PemilikKantin, UserInformation, UserRole
 from rest_framework.viewsets import ReadOnlyModelViewSet
-from commons.exceptions import ExtendedAPIException, IntegrityErrorException, UnauthorizedException
+from commons.exceptions import ExtendedAPIException, IntegrityErrorException, NotFoundException, UnauthorizedException
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 from .models import Kantin
 from .serializers import KantinEditSerializer, KantinSerializer, RegisterKantinSerializer
@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from commons.exceptions import IntegrityErrorException
 from django.db import Error, IntegrityError
+from django.core.exceptions import ObjectDoesNotExist
 
 class KantinViewSet(ReadOnlyModelViewSet):
     permission_classes=[AllowAny]
@@ -45,7 +46,18 @@ class RegisterKantinView(APIView):
             raise IntegrityErrorException("Pemilik Kantin has registered Kantin previously")
         except Error as e:
             raise ExtendedAPIException(e)
+        
+class KantinView(APIView):
+    permissions = [AllowAny]
 
+    def get(self, request, id, format=None):
+        try:
+            kantin = Kantin.objects.get(id=id)
+            serializer = KantinSerializer(kantin)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except ObjectDoesNotExist:
+            raise NotFoundException("Cannot find kantin by given id.")
+    
 class EditKantinProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
