@@ -1,4 +1,4 @@
-from django.db import models, transaction
+from django.db import IntegrityError, models, transaction
 from django.contrib.auth.models import User
 from commons.exceptions import AuthenticationException, IntegrityErrorException
 
@@ -42,22 +42,28 @@ class PemilikKantin(models.Model):
         :param user_information_id: ID of the UserInformation for which the Kantin is being registered.
         :param kantin_data: Dictionary containing data for the new Kantin.
         """
-        pemilik, _ = cls.objects.get_or_create(
+        
+        pemilik = cls.objects.get(
             user_information=user_information,
-            defaults={'kantin': None}  # Adjust the defaults as needed
         )
+        print(pemilik.user_information)
 
         if not pemilik:
             raise AuthenticationException("PemilikKantin with given user information does not exist.")
 
         # Check if the pemilik already has a kantin
-        if pemilik.kantin:
-            raise IntegrityErrorException("This PemilikKantin already has a registered Kantin.")
+        print(pemilik.kantin)
+        if pemilik.kantin is not None:
+            raise IntegrityError
 
         with transaction.atomic():
 
             # Create Kantin instance
-            kantin = Kantin.objects.create(**kantin_data)
+            kantin = Kantin.objects.create(nama=kantin_data.nama, 
+                                           lokasi=kantin_data.lokasi,
+                                           deskripsi=kantin_data.deskripsi,
+                                           list_foto=kantin_data.list_foto,
+                                            status_verifikasi="Pending")
 
             # Link UserInformation with Kantin
             pemilik.kantin = kantin
@@ -65,9 +71,21 @@ class PemilikKantin(models.Model):
 
         return kantin
     
+    def editProfilKantin(self, nama, deskripsi, list_foto):
+        if self.kantin:
+            self.kantin.nama = nama
+            self.kantin.deskripsi = deskripsi
+            self.kantin.list_foto = list_foto  
+            self.kantin.save()
+            return self.kantin
+        else:
+            raise ValueError("This PemilikKantin does not have a linked Kantin.")
+    
+    
 class Pengguna(models.Model):
     user_information = models.OneToOneField(UserInformation, on_delete=models.CASCADE, related_name='pengguna')
     kantin_favorit = models.ManyToManyField(Kantin, blank=True)
 
     def __str__(self):
         return f"{self.user_information.nama} - Favorite Kantins: {', '.join(str(kantin) for kantin in self.kantin_favorit.all())}"
+

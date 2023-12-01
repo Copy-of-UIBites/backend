@@ -10,4 +10,5 @@ urlpatterns = [
     path('register', UserRegistrationEmailView.as_view(), name='register'),
     path('login', TokenObtainPairView.as_view(), name='token_obtain_pair'),
     path('login/refresh', TokenRefreshView.as_view(), name='token_refresh'),
+
 ]

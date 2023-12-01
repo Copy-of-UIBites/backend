@@ -47,4 +47,3 @@ class PemilikKantinSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PemilikKantin
-
