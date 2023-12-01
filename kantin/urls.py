@@ -2,10 +2,8 @@
 
 from django.urls import path
 from rest_framework import routers
-from .views import EditKantinProfileView, KantinView, KantinViewSet, RegisterKantinView
-from os import path
+from .views import EditKantinProfileView, KantinView, KantinViewSet, RegisterKantinView, DaftarKantinFavoritViewSet
 from rest_framework import routers
-from .views import KantinViewSet,DaftarKantinFavoritViewSet
 
 router = routers.DefaultRouter()
 router.register(r'daftar-kantin-favorit', DaftarKantinFavoritViewSet, basename='daftar-kantin-favorit')
