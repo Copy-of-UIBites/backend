@@ -47,3 +47,8 @@ class PemilikKantinSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = PemilikKantin
+
+class UserInformationUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserInformation
+        fields = ['nama', 'nomor_telepon', 'foto']
