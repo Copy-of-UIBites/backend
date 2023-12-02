@@ -6,6 +6,11 @@ class StatusKantin(models.TextChoices):
     VERIFIED = 'Terverifikasi'
     PENDING = 'Pending'
     DISPROVED = 'Tidak terverifikasi'
+
+    @classmethod
+    def is_valid_status(cls, input_str):
+        return any(input_str == status.value for status in cls)
+
 class Kantin(models.Model):
     nama = models.CharField(max_length=1024)
     lokasi = models.CharField(max_length=1024)
@@ -23,6 +28,26 @@ class Kantin(models.Model):
             return cls.objects.filter(nama__icontains=query)
         else:
             return cls.objects.all()
+    
+    def deleteUlasan(self, ulasan_id):
+        ulasan = Ulasan.objects.get(id=ulasan_id)
+        ulasan.delete()
+        return ulasan
+
+    def createUlasan(self, request):
+        ulasan = Ulasan(**request.data)
+        ulasan.kantin = self
+        ulasan.user = request.user
+        ulasan.save()
+        return ulasan
+    
+    def verifyKantin(self, status_verifikasi):
+        if not StatusKantin.is_valid_status(status_verifikasi):
+            raise Exception('Status Verifikasi not valid')
+        self.status_verifikasi = status_verifikasi
+        self.save()
+        return self
+        
 
 class Menu(models.Model):
     nama = models.CharField(max_length=1024)
