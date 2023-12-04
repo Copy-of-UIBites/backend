@@ -6,8 +6,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from commons.exceptions import ExtendedAPIException, IntegrityErrorException, NotFoundException, UnauthorizedException, BadRequestException
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 
-from .models import Kantin
-from .serializers import KantinEditSerializer, KantinSerializer, RegisterKantinSerializer
+from .models import Kantin, Ulasan
+from .serializers import KantinEditSerializer, KantinSerializer, RegisterKantinSerializer, UlasanSerializer
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -18,6 +18,8 @@ from django.db import Error, IntegrityError
 from django.core.exceptions import ObjectDoesNotExist
 
 from rest_framework.decorators import action
+
+from commons.permissions import IsAdmin, IsUser
 
 class KantinViewSet(ReadOnlyModelViewSet):
     permission_classes=[AllowAny]
@@ -115,3 +117,63 @@ class EditKantinProfileView(APIView):
             return Response({'error': 'PemilikKantin not found'}, status=404)
         except Exception as e:
             return Response({'error': str(e)}, status=400)
+
+class UlasanKantinView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+        # Get All Ulasan for A Specific Kantin
+        try:
+            kantin = Kantin.objects.get(id=id)
+            ulasan = Ulasan.objects.filter(kantin=kantin)
+            return Response(UlasanSerializer(ulasan,many=True).data, status=200)
+        except Kantin.DoesNotExist:
+            return Response({'error':f"Kantin with ID {id} not found"}, status=404)
+        except Exception as e:
+            return Response({'error':str(e)}, status=400)
+    
+class CreateUlasanKantinView(APIView):
+    permission_classes = [IsUser]
+
+    def post(self, request, id):
+        # Create Ulasan Kantin
+        try:
+            kantin = Kantin.objects.get(id=id)
+            ulasan = kantin.createUlasan(request)
+            return Response(UlasanSerializer(ulasan).data, status=status.HTTP_201_CREATED)
+        except Kantin.DoesNotExist:
+            return Response({'error':f"Kantin with ID {id} not found"}, status=404)
+        except Exception as e:
+            return Response({'error':str(e)}, status=400)
+
+class DeleteUlasanKantinView(APIView):
+    permission_classes = [IsAdmin]
+
+    @action(detail=False, methods=['delete'])
+    def delete(self, request, id):
+        # Delete A Specific Ulasan
+        try:
+            kantin = Kantin.objects.get(id=id)
+            ulasan = kantin.deleteUlasan(request.data['ulasanId'])
+            return Response({'message':f"Ulasan with ID {request.data['ulasanId']} deleted succesfully"}, status=200)
+        except Kantin.DoesNotExist:
+            return Response({'error':f"Kantin with ID {id} not found"}, status=404)
+        except Ulasan.DoesNotExist:
+            return Response({'error':f"Ulasan with ID {request.data['ulasanId']} not found"}, status=404)
+        except Exception as e:
+            return Response({'error':str(e)}, status=400)
+
+
+class VerifyKantinView(APIView):
+    permission_classes = [IsAdmin]
+
+    def patch(self, request, id):
+        # Update Status Verifikasi of A Kantin
+        try:
+            kantin = Kantin.objects.get(id=id)
+            kantin.verifyKantin(request.data['status_verifikasi'])
+            return Response({'message':f"Kantin with ID {id} succesfully verified with status {request.data['status_verifikasi']}"}, status=200)
+        except Kantin.DoesNotExist:
+            return Response({'error':f"Kantin with ID {id} not found"}, status=404)
+        except Exception as e:
+            return Response({'error':str(e)})

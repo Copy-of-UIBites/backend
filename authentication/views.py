@@ -7,7 +7,7 @@ from django.contrib.auth.models import User
 from .dataclasses.user_registration_dataclass import UserRegistrationEmailDataClass
 
 from .models import Pengguna, UserInformation, PemilikKantin
-from .serializers import UserRegistrationSerializer, UserInformationSerializer
+from .serializers import UserInformationUpdateSerializer, UserRegistrationSerializer, UserInformationSerializer
 from django.db import IntegrityError, transaction
 from django.db import transaction
 
@@ -65,3 +65,17 @@ class UserRegistrationEmailView(APIView):
         except IntegrityError as e:
             raise IntegrityErrorException('User has registered')
             
+class UserEditView(APIView):
+    permission_classes = [IsAuthenticated]
+    
+    def post(self, request):
+        try:
+            user_info = UserInformation.objects.get(user=request.user)
+            serializer = UserInformationUpdateSerializer(user_info, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            response = serializer.data
+            return Response(response)
+        except IntegrityError as e:
+            print(e)
+            raise IntegrityErrorException('User has registered')
