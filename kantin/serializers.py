@@ -11,6 +11,7 @@ class UlasanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ulasan
         fields = '__all__'  
+        
 class KantinSerializer(serializers.ModelSerializer):
     class Meta:
         model = Kantin

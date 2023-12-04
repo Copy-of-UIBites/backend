@@ -1,9 +1,8 @@
 from django.shortcuts import render
 from requests import Response
-from rest_framework import viewsets
 
 from authentication.models import Pengguna, UserInformation, PemilikKantin, UserInformation, UserRole
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from commons.exceptions import ExtendedAPIException, IntegrityErrorException, NotFoundException, UnauthorizedException, BadRequestException
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 
@@ -32,8 +31,8 @@ class KantinViewSet(ReadOnlyModelViewSet):
         else:
             return Kantin.objects.all()
 
-class DaftarKantinFavoritViewSet(viewsets.ModelViewSet):
-    serializer_class = KantinSerializer  # Change to YourModelSerializer if needed
+class DaftarKantinFavoritViewSet(ModelViewSet):
+    serializer_class = KantinSerializer
 
     def get_queryset(self):
         user = UserInformation.objects.select_related('user').get(user=self.request.user)
