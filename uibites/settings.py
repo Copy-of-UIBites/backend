@@ -87,6 +87,12 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'uibites.wsgi.application'
 
+# cors
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ORIGIN_WHITELIST = (
+  'http://localhost:3000',
+)
+
 # REST framework config
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
