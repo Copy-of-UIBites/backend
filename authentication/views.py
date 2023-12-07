@@ -1,8 +1,11 @@
-from commons.exceptions import IntegrityErrorException
+from commons.exceptions import IntegrityErrorException, NotFoundException
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
+
+from commons.permissions import IsCanteenOwner
+from kantin.serializers import KantinSerializer
 
 from .dataclasses.user_registration_dataclass import UserRegistrationEmailDataClass
 
@@ -79,3 +82,16 @@ class UserEditView(APIView):
         except IntegrityError as e:
             print(e)
             raise IntegrityErrorException('User has registered')
+
+class MyKantinView(APIView):
+    permission_classes = [IsCanteenOwner]
+    serializer_class = KantinSerializer
+
+    def get(self, request):
+        try:
+            user_info = UserInformation.objects.get(user=request.user)
+            pemilik_kantin = PemilikKantin.objects.get(user_information=user_info)
+            response =  self.serializer_class(pemilik_kantin.kantin).data
+            return Response(response)
+        except FileNotFoundError:
+            raise NotFoundException("Kantin not found")
