@@ -10,7 +10,7 @@ from kantin.serializers import KantinSerializer
 from .dataclasses.user_registration_dataclass import UserRegistrationEmailDataClass
 
 from .models import Pengguna, UserInformation, PemilikKantin
-from .serializers import UserInformationUpdateSerializer, UserRegistrationSerializer, UserInformationSerializer
+from .serializers import UserInformationNameSerializer, UserInformationUpdateSerializer, UserRegistrationSerializer, UserInformationSerializer
 from django.db import IntegrityError, transaction
 from django.db import transaction
 
@@ -23,7 +23,14 @@ class UserInformationView(APIView):
         response = self.serializer_class(profile).data
         return Response(response)
     
+class UserInformationIdView(APIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = UserInformationNameSerializer
 
+    def get(self, request, id):
+        profile = UserInformation.objects.select_related('user').get(user=id)
+        response = self.serializer_class(profile).data
+        return Response(response)
 
 class UserRegistrationEmailView(APIView):
     permission_classes = [AllowAny]

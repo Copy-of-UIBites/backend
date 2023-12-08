@@ -60,10 +60,10 @@ class Menu(models.Model):
 
 class Ulasan(models.Model):
     kantin = models.ForeignKey(Kantin, on_delete=models.CASCADE, related_name='ulasan_list')
-    time_created = models.DateTimeField(auto_now_add=True)
+    time = models.DateTimeField(auto_now_add=True)
     review = models.TextField()
     rating = models.IntegerField()
-    list_foto = ArrayField(models.CharField(), blank=True)
+    foto = ArrayField(models.CharField(), blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='ulasan_list') 
 
     def __str__(self):

@@ -62,6 +62,26 @@ class DaftarKantinFavoritViewSet(ModelViewSet):
 
         return Response('Kantin added to your favorites! 🌟')
     
+    @action(detail=False, methods=['post'])
+    def remove(self, request):
+        user = UserInformation.objects.select_related('user').get(user=request.user)
+        pengguna = Pengguna.objects.get(user_information=user)
+
+        kantin_id = request.data.get('kantin_id')
+
+        try:
+            kantin = Kantin.objects.get(id=kantin_id)
+        except Kantin.DoesNotExist:
+            return NotFoundException('Sorry, Kantin not found. 😢')
+
+        if kantin not in pengguna.kantin_favorit.all():
+            return BadRequestException('Kantin not in favorites yet.')
+
+        pengguna.kantin_favorit.remove(kantin)
+
+        return Response('Kantin removed from your favorites!')
+    
+    
 class RegisterKantinView(APIView):
     permissions = [IsAuthenticated]
 
