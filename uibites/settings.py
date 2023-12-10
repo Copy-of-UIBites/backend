@@ -90,11 +90,11 @@ WSGI_APPLICATION = 'uibites.wsgi.application'
 # cors
 CORS_ORIGIN_ALLOW_ALL = False
 CORS_ORIGIN_WHITELIST = (
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://uibites-frontend-catherineeangel.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://uibites-frontend-catherineeangel.vercel.app',
+    '.catherineeangel.vercel.app', 
 )
-
 # REST framework config
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
