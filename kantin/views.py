@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from requests import Response
 from rest_framework import viewsets
 
@@ -7,7 +6,7 @@ from rest_framework.viewsets import ReadOnlyModelViewSet
 from commons.exceptions import ExtendedAPIException, IntegrityErrorException, NotFoundException, UnauthorizedException, BadRequestException
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 
-from .models import Kantin, Ulasan
+from .models import Kantin, Menu, Ulasan
 from .serializers import KantinEditSerializer, KantinSerializer, RegisterKantinSerializer, UlasanSerializer
 
 from rest_framework import status
@@ -21,6 +20,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
 
 from commons.permissions import IsAdmin, IsUser
+from django.db import transaction
 
 class KantinViewSet(ReadOnlyModelViewSet):
     permission_classes=[AllowAny]
@@ -73,12 +73,22 @@ class RegisterKantinView(APIView):
 
         try:
             # serialize kantin data
-            serializer = RegisterKantinSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
+            with transaction.atomic():
+                serializer = RegisterKantinSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
 
-            data = KantinRegistrationDataClass(**serializer.validated_data)
-            new_kantin = PemilikKantin.registerKantin(user_info, data)
-            
+                data = KantinRegistrationDataClass(**serializer.validated_data)
+                new_kantin = PemilikKantin.registerKantin(user_info, data)
+                menus = request.data.get('menu', [])  # Get the menus array from request data
+                for menu_data in menus:
+                    menu = Menu.objects.create(
+                        nama=menu_data.get('nama', ''),
+                        deskripsi=menu_data.get('deskripsi', ''),
+                        harga=menu_data.get('harga', 0),
+                        kantin=new_kantin  # Assign the kantin to the menu
+                    )
+
+
             return Response(KantinSerializer(new_kantin).data, status=status.HTTP_201_CREATED)
             
         except IntegrityError as e:
