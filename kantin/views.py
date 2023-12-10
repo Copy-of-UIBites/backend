@@ -1,8 +1,7 @@
 from requests import Response
-from rest_framework import viewsets
 
 from authentication.models import Pengguna, UserInformation, PemilikKantin, UserInformation, UserRole
-from rest_framework.viewsets import ReadOnlyModelViewSet
+from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from commons.exceptions import ExtendedAPIException, IntegrityErrorException, NotFoundException, UnauthorizedException, BadRequestException
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 
@@ -34,8 +33,8 @@ class KantinViewSet(ReadOnlyModelViewSet):
         else:
             return Kantin.objects.all()
 
-class DaftarKantinFavoritViewSet(viewsets.ModelViewSet):
-    serializer_class = KantinSerializer  # Change to YourModelSerializer if needed
+class DaftarKantinFavoritViewSet(ModelViewSet):
+    serializer_class = KantinSerializer
 
     def get_queryset(self):
         user = UserInformation.objects.select_related('user').get(user=self.request.user)
@@ -62,6 +61,26 @@ class DaftarKantinFavoritViewSet(viewsets.ModelViewSet):
         pengguna.kantin_favorit.add(kantin)
 
         return Response('Kantin added to your favorites! 🌟')
+    
+    @action(detail=False, methods=['post'])
+    def remove(self, request):
+        user = UserInformation.objects.select_related('user').get(user=request.user)
+        pengguna = Pengguna.objects.get(user_information=user)
+
+        kantin_id = request.data.get('kantin_id')
+
+        try:
+            kantin = Kantin.objects.get(id=kantin_id)
+        except Kantin.DoesNotExist:
+            return NotFoundException('Sorry, Kantin not found. 😢')
+
+        if kantin not in pengguna.kantin_favorit.all():
+            return BadRequestException('Kantin not in favorites yet.')
+
+        pengguna.kantin_favorit.remove(kantin)
+
+        return Response('Kantin removed from your favorites!')
+    
     
 class RegisterKantinView(APIView):
     permissions = [IsAuthenticated]

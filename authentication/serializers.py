@@ -26,6 +26,19 @@ class UserInformationSerializer(serializers.ModelSerializer):
         model = UserInformation
         fields = '__all__'
 
+class UserInformationNameSerializer(serializers.ModelSerializer):
+    user = UserSerializer()
+
+    class Meta:
+        model = UserInformation
+        exclude = (
+            'id',
+            'nomor_telepon',
+            'is_admin',
+            'foto',
+            'role',
+        )
+
 class UserRegistrationSerializer(serializers.Serializer):
      # Base user model
     email = serializers.EmailField()

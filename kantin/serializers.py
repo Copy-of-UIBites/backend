@@ -11,6 +11,7 @@ class UlasanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ulasan
         fields = '__all__'  
+        
 class KantinSerializer(serializers.ModelSerializer):
     menu = MenuSerializer(many=True, read_only=True)
     class Meta:
