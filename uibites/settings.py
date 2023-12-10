@@ -93,7 +93,6 @@ CORS_ORIGIN_WHITELIST = (
     'http://localhost:3000',
     'http://localhost:3001',
     'https://uibites-frontend-catherineeangel.vercel.app',
-    '.catherineeangel.vercel.app', 
 )
 # REST framework config
 REST_FRAMEWORK = {
