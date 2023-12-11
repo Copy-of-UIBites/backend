@@ -6,7 +6,7 @@ from commons.exceptions import ExtendedAPIException, IntegrityErrorException, No
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 
 from .models import Kantin, Menu, Ulasan
-from .serializers import KantinEditSerializer, KantinSerializer, RegisterKantinSerializer, UlasanSerializer
+from .serializers import KantinEditSerializer, KantinSerializer, MenuSerializer, RegisterKantinSerializer, UlasanSerializer
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -129,6 +129,7 @@ class KantinView(APIView):
 class EditKantinProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @transaction.atomic
     def post(self, request):
         try:
             pemilik_kantin = PemilikKantin.objects.get(user_information__user=request.user)
@@ -141,6 +142,17 @@ class EditKantinProfileView(APIView):
                 deskripsi=serializer.validated_data['deskripsi'],
                 list_foto=serializer.validated_data['list_foto']
             )
+
+            for menu_data in request.data['menu']:
+                # update or create new menu
+                if 'id' in menu_data:
+                    menu = Menu.objects.get(pk=menu_data['id'])
+                    menu_serializer = MenuSerializer(menu, menu_data)
+                else:
+                    menu_serializer = MenuSerializer(data=menu_data)
+
+                menu_serializer.is_valid(raise_exception=True)
+                menu_serializer.save()
 
             return Response({'message': 'Kantin profile updated successfully', 'kantin': kantin.nama})
         except PemilikKantin.DoesNotExist:

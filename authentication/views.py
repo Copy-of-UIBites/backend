@@ -87,7 +87,6 @@ class UserEditView(APIView):
             response = serializer.data
             return Response(response)
         except IntegrityError as e:
-            print(e)
             raise IntegrityErrorException('User has registered')
 
 class MyKantinView(APIView):
