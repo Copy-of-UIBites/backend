@@ -191,8 +191,7 @@ class CreateUlasanKantinView(APIView):
 class DeleteUlasanKantinView(APIView):
     permission_classes = [IsAdmin]
 
-    @action(detail=False, methods=['delete'])
-    def delete(self, request, id):
+    def post(self, request, id):
         # Delete A Specific Ulasan
         try:
             kantin = Kantin.objects.get(id=id)
@@ -218,4 +217,14 @@ class VerifyKantinView(APIView):
         except Kantin.DoesNotExist:
             return Response({'error':f"Kantin with ID {id} not found"}, status=404)
         except Exception as e:
-            return Response({'error':str(e)})
+            return Response({'error':str(e)}, status=400)
+        
+class GetAllUnverifiedKantinView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        try:
+            kantin = Kantin.objects.filter(status_verifikasi = 'Pending')
+            return Response(KantinSerializer(kantin, many=True).data, status=200)
+        except Exception as e:
+            return Response({'error':str(e)}, status=400)

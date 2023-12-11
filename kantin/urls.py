@@ -3,7 +3,7 @@
 from django.urls import path
 from rest_framework import routers
 from .views import EditKantinProfileView, KantinView, KantinViewSet, RegisterKantinView, DaftarKantinFavoritViewSet, UlasanKantinView
-from .views import CreateUlasanKantinView, DeleteUlasanKantinView, VerifyKantinView
+from .views import CreateUlasanKantinView, DeleteUlasanKantinView, VerifyKantinView, GetAllUnverifiedKantinView
 from rest_framework import routers
 
 router = routers.DefaultRouter()
@@ -18,6 +18,7 @@ urlpatterns = [
     path('ulasan/<int:id>', UlasanKantinView.as_view(), name='ulasan_kantin'),
     path('ulasan/delete/<int:id>', DeleteUlasanKantinView.as_view(), name='delete_ulasan_kantin'),
     path('verify/<int:id>', VerifyKantinView.as_view(), name='verify_kantin'),
+    path('unverified', GetAllUnverifiedKantinView.as_view(), name='unferivied_kantin'),
 ]
 
 urlpatterns += router.urls
