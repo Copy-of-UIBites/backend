@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from requests import Response
 
 from authentication.models import Pengguna, UserInformation, PemilikKantin, UserInformation, UserRole
@@ -6,8 +5,8 @@ from rest_framework.viewsets import ReadOnlyModelViewSet, ModelViewSet
 from commons.exceptions import ExtendedAPIException, IntegrityErrorException, NotFoundException, UnauthorizedException, BadRequestException
 from kantin.dataclasses.kantin_registration_dataclass import KantinRegistrationDataClass
 
-from .models import Kantin, Ulasan
-from .serializers import KantinEditSerializer, KantinSerializer, RegisterKantinSerializer, UlasanSerializer
+from .models import Kantin, Menu, Ulasan
+from .serializers import KantinEditSerializer, KantinSerializer, MenuSerializer, RegisterKantinSerializer, UlasanSerializer
 
 from rest_framework import status
 from rest_framework.response import Response
@@ -20,6 +19,7 @@ from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.decorators import action
 
 from commons.permissions import IsAdmin, IsUser
+from django.db import transaction
 
 class KantinViewSet(ReadOnlyModelViewSet):
     permission_classes=[AllowAny]
@@ -92,12 +92,22 @@ class RegisterKantinView(APIView):
 
         try:
             # serialize kantin data
-            serializer = RegisterKantinSerializer(data=request.data)
-            serializer.is_valid(raise_exception=True)
+            with transaction.atomic():
+                serializer = RegisterKantinSerializer(data=request.data)
+                serializer.is_valid(raise_exception=True)
 
-            data = KantinRegistrationDataClass(**serializer.validated_data)
-            new_kantin = PemilikKantin.registerKantin(user_info, data)
-            
+                data = KantinRegistrationDataClass(**serializer.validated_data)
+                new_kantin = PemilikKantin.registerKantin(user_info, data)
+                menus = request.data.get('menu', [])  # Get the menus array from request data
+                for menu_data in menus:
+                    menu = Menu.objects.create(
+                        nama=menu_data.get('nama', ''),
+                        deskripsi=menu_data.get('deskripsi', ''),
+                        harga=menu_data.get('harga', 0),
+                        kantin=new_kantin  # Assign the kantin to the menu
+                    )
+
+
             return Response(KantinSerializer(new_kantin).data, status=status.HTTP_201_CREATED)
             
         except IntegrityError as e:
@@ -119,6 +129,7 @@ class KantinView(APIView):
 class EditKantinProfileView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @transaction.atomic
     def post(self, request):
         try:
             pemilik_kantin = PemilikKantin.objects.get(user_information__user=request.user)
@@ -131,6 +142,17 @@ class EditKantinProfileView(APIView):
                 deskripsi=serializer.validated_data['deskripsi'],
                 list_foto=serializer.validated_data['list_foto']
             )
+
+            for menu_data in request.data['menu']:
+                # update or create new menu
+                if 'id' in menu_data:
+                    menu = Menu.objects.get(pk=menu_data['id'])
+                    menu_serializer = MenuSerializer(menu, menu_data)
+                else:
+                    menu_serializer = MenuSerializer(data=menu_data)
+
+                menu_serializer.is_valid(raise_exception=True)
+                menu_serializer.save()
 
             return Response({'message': 'Kantin profile updated successfully', 'kantin': kantin.nama})
         except PemilikKantin.DoesNotExist:
@@ -168,8 +190,7 @@ class CreateUlasanKantinView(APIView):
 class DeleteUlasanKantinView(APIView):
     permission_classes = [IsAdmin]
 
-    @action(detail=False, methods=['delete'])
-    def delete(self, request, id):
+    def post(self, request, id):
         # Delete A Specific Ulasan
         try:
             kantin = Kantin.objects.get(id=id)
@@ -195,4 +216,14 @@ class VerifyKantinView(APIView):
         except Kantin.DoesNotExist:
             return Response({'error':f"Kantin with ID {id} not found"}, status=404)
         except Exception as e:
-            return Response({'error':str(e)})
+            return Response({'error':str(e)}, status=400)
+        
+class GetAllUnverifiedKantinView(APIView):
+    permission_classes = [IsAdmin]
+
+    def get(self, request):
+        try:
+            kantin = Kantin.objects.filter(status_verifikasi = 'Pending')
+            return Response(KantinSerializer(kantin, many=True).data, status=200)
+        except Exception as e:
+            return Response({'error':str(e)}, status=400)
