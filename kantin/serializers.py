@@ -7,6 +7,17 @@ class MenuSerializer(serializers.ModelSerializer):
         model = Menu
         fields = '__all__'  
 
+    def create(self, validated_data):
+        # Logic to create a new Menu item
+        return Menu.objects.create(**validated_data)
+
+    def update(self, instance, validated_data):
+        # Logic to update an existing Menu item
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        instance.save()
+        return instance
+
 class UlasanSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ulasan
@@ -32,3 +43,4 @@ class KantinEditSerializer(serializers.Serializer):
         child=serializers.URLField(),
         required=False  # Make it optional if you want
     )
+    menu = MenuSerializer(many=True)
