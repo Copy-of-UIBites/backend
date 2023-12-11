@@ -34,6 +34,7 @@ class KantinViewSet(ReadOnlyModelViewSet):
             return Kantin.objects.all()
 
 class DaftarKantinFavoritViewSet(ModelViewSet):
+    permission_classes=[IsAuthenticated]
     serializer_class = KantinSerializer
 
     def get_queryset(self):
