@@ -134,8 +134,10 @@ class EditKantinProfileView(APIView):
     def post(self, request):
         try:
             pemilik_kantin = PemilikKantin.objects.get(user_information__user=request.user)
-
+            for menu_data in request.data['menu']:
+                menu_data['kantin'] = pemilik_kantin.kantin.id  
             serializer = KantinEditSerializer(data=request.data)
+
             serializer.is_valid(raise_exception=True)
 
             kantin = pemilik_kantin.editProfilKantin(
@@ -144,8 +146,11 @@ class EditKantinProfileView(APIView):
                 list_foto=serializer.validated_data['list_foto']
             )
 
+
             for menu_data in request.data['menu']:
                 # update or create new menu
+                menu_data['kantin'] = kantin.id
+
                 if 'id' in menu_data:
                     menu = Menu.objects.get(pk=menu_data['id'])
                     menu_serializer = MenuSerializer(menu, menu_data)

@@ -9,6 +9,12 @@ class MenuSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         # Logic to create a new Menu item
+        kantin = validated_data.pop('kantin', None)
+
+        # Create the Menu item with the 'kantin' field set
+        menu = Menu.objects.create(kantin=kantin, **validated_data)
+        return menu
+
         return Menu.objects.create(**validated_data)
 
     def update(self, instance, validated_data):
