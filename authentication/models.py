@@ -46,13 +46,12 @@ class PemilikKantin(models.Model):
         pemilik = cls.objects.get(
             user_information=user_information,
         )
-        print(pemilik.user_information)
+
 
         if not pemilik:
             raise AuthenticationException("PemilikKantin with given user information does not exist.")
 
         # Check if the pemilik already has a kantin
-        print(pemilik.kantin)
         if pemilik.kantin is not None:
             raise IntegrityError
 
