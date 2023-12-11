@@ -98,8 +98,11 @@ class MyKantinView(APIView):
         try:
             user_info = UserInformation.objects.get(user=request.user)
             pemilik_kantin = PemilikKantin.objects.get(user_information=user_info)
-            response =  self.serializer_class(pemilik_kantin.kantin).data
-            return Response(response)
+            if pemilik_kantin.kantin:
+                response = self.serializer_class(pemilik_kantin.kantin).data
+                return Response(response)
+            else:
+                return Response(None)
         except FileNotFoundError:
             raise NotFoundException("Kantin not found")
         
