@@ -1,6 +1,7 @@
 from django.db import IntegrityError, models, transaction
 from django.contrib.auth.models import User
 from commons.exceptions import AuthenticationException, IntegrityErrorException
+from django.core.exceptions import ValidationError
 
 from kantin.models import Kantin
 
@@ -56,7 +57,6 @@ class PemilikKantin(models.Model):
             raise IntegrityError
 
         with transaction.atomic():
-
             # Create Kantin instance
             kantin = Kantin.objects.create(nama=kantin_data.nama, 
                                            lokasi=kantin_data.lokasi,
@@ -79,6 +79,16 @@ class PemilikKantin(models.Model):
             return self.kantin
         else:
             raise ValueError("This PemilikKantin does not have a linked Kantin.")
+        
+    def deleteKantin(self):
+        if self.kantin:
+            with transaction.atomic():
+                self.kantin.delete()
+                self.kantin = None
+                self.save()
+        else:
+            raise ValidationError("This PemilikKantin does not have a linked Kantin to delete.")
+
     
     
 class Pengguna(models.Model):

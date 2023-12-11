@@ -1,8 +1,9 @@
-from commons.exceptions import IntegrityErrorException, NotFoundException
+from commons.exceptions import BadRequestException, IntegrityErrorException, NotFoundException
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 from commons.permissions import IsCanteenOwner
 from kantin.serializers import KantinSerializer
@@ -101,3 +102,12 @@ class MyKantinView(APIView):
             return Response(response)
         except FileNotFoundError:
             raise NotFoundException("Kantin not found")
+        
+    def delete(self, request):
+        try:
+            user_info = UserInformation.objects.get(user=request.user)
+            pemilik_kantin = PemilikKantin.objects.get(user_information=user_info)
+            pemilik_kantin.deleteKantin()
+            return Response('Kantin deleted')
+        except ValidationError:
+            raise BadRequestException("Pemilik kantin does not have any kantin.")
