@@ -139,7 +139,6 @@ class EditKantinProfileView(APIView):
             return Response({'error': str(e)}, status=400)
 
 class UlasanKantinView(APIView):
-    permission_classes = [IsAuthenticated]
 
     def get(self, request, id):
         # Get All Ulasan for A Specific Kantin

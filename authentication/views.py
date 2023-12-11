@@ -24,7 +24,6 @@ class UserInformationView(APIView):
         return Response(response)
     
 class UserInformationIdView(APIView):
-    permission_classes = [IsAuthenticated]
     serializer_class = UserInformationNameSerializer
 
     def get(self, request, id):
